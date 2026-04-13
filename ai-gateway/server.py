@@ -97,7 +97,6 @@ def chat():
         "usage": {"prompt_tokens": 14, "completion_tokens": 22, "total_tokens": 36},
     })
 
-# ── The vulnerable endpoint ────────────────────────────────────────────────────
 @app.route("/engines/_configure", methods=["POST"])
 def engine_configure():
     global _engine_flags
