@@ -1,0 +1,82 @@
+version: "3.9"
+
+# Helix AI Platform — local development stack
+
+networks:
+  helix-internal:
+    driver: bridge
+
+volumes:
+  gateway-data:
+  pg-data:
+  redis-data:
+
+services:
+
+  ai-gateway:
+    build: ./ai-gateway
+    container_name: ai-gateway
+    networks:
+      - helix-internal
+    ports:
+      - "12434:12434"
+    volumes:
+      - ./host-vm:/hostfs
+      - gateway-data:/hostfs/var/lib/docker
+    healthcheck:
+      test: ["CMD", "python", "-c",
+        "import urllib.request; urllib.request.urlopen('http://localhost:12434/healthz')"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+
+  code-review-api:
+    build: ./code-review-api
+    container_name: code-review-api
+    networks:
+      - helix-internal
+    ports:
+      - "5000:5000"
+    environment:
+      - GATEWAY_URL=http://ai-gateway:12434
+    depends_on:
+      ai-gateway:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    networks:
+      - helix-internal
+    environment:
+      POSTGRES_DB: helix
+      POSTGRES_USER: helix
+      POSTGRES_PASSWORD: helix_dev_pw
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    networks:
+      - helix-internal
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+
+  telemetry-agent:
+    build: ./telemetry-agent
+    container_name: telemetry-agent
+    networks:
+      - helix-internal
+    extra_hosts:
+      - "model-runner.docker.internal:ai-gateway"
+    volumes:
+      - ./host-vm:/hostfs:ro
+      - gateway-data:/hostfs/var/lib/docker:ro
+    depends_on:
+      ai-gateway:
+        condition: service_healthy
