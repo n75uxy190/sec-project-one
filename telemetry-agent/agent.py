@@ -24,7 +24,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 _SERVICES = {
-    "gateway":     "http://model-runner.docker.internal:12434",
+    "gateway":     "http://ai-gateway:12434",
     "review-api":  "http://code-review-api:5000",
     "postgres":    "http://postgres:5432",   
     "redis":       "http://redis:6379",     

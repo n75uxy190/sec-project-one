@@ -72,8 +72,8 @@ services:
     container_name: telemetry-agent
     networks:
       - helix-internal
-    extra_hosts:
-      - "model-runner.docker.internal:ai-gateway"
+    environment:
+      - GATEWAY_OVERRIDE=http://ai-gateway:12434
     volumes:
       - ./host-vm:/hostfs:ro
       - gateway-data:/hostfs/var/lib/docker:ro
