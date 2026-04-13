@@ -1,6 +1,6 @@
 version: "3.9"
 
-# Helix AI Platform — local development stack
+# Helix AI Platform — local development stack (for our example)
 
 networks:
   helix-internal:
